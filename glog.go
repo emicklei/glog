@@ -1,6 +1,7 @@
 // Go support for leveled logs, analogous to https://code.google.com/p/google-glog/
 //
 // Copyright 2013 Google Inc. All Rights Reserved.
+// Modifications are copyright 2013 Ernest Micklei. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,6 +68,14 @@
 //			-vmodule=gopher*=3
 //		sets the V level to 3 in all Go files whose names begin "gopher".
 //
+// Logstash support.
+//
+//  -logstash=false
+//		Logs are also written to the Writer which is setup by SetLogstashWriter.
+//
+//	glog.SetLogstashWriter(...)
+//		Provide an io.Writer to write the JSON representation of log events.
+//		This can a file, an UDP connection or any other destination. You decide.
 package glog
 
 import (
@@ -417,6 +426,7 @@ type loggingT struct {
 	// compatibility. TODO: does this matter enough to fix? Seems unlikely.
 	toStderr     bool // The -logtostderr flag.
 	alsoToStderr bool // The -alsologtostderr flag.
+	toLogstash   bool // The -logstash flag.
 
 	// Level flag. Handled atomically.
 	stderrThreshold severity // The -stderrthreshold flag.
@@ -644,6 +654,10 @@ func (l *loggingT) output(s severity, buf *buffer) {
 		}
 	}
 	data := buf.Bytes()
+	// if logstash is enabled and setup then write the data to it
+	if l.toLogstash && logstashAdapter != nil {
+		logstashAdapter.Write(data)
+	}
 	if l.toStderr {
 		os.Stderr.Write(data)
 	} else {
