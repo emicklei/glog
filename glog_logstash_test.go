@@ -51,6 +51,7 @@ var jsonEnd = `"file":"glog_logstash_test.go","line":18}
 `
 
 func ExampleSetLogstashWriter() {
+	// TODO write the UDP example
 	logstash, err := os.Create("logstash.log")
 	if err == nil {
 		defer logstash.Close()

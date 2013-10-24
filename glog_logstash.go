@@ -61,22 +61,22 @@ type glogJSON struct {
 }
 
 // Write decodes the data and writes a logstash json event
-func (d glogJSON) Write(data []byte) (n int, err error) {
+func (d glogJSON) WriteWithStack(data []byte, stack []byte) {
 	if len(data) == 0 {
-		return 0, nil
+		return
 	}
 	d.openEvent()
 	// peek for normal logline
 	sev := data[0]
 	switch sev {
 	case 73, 87, 69, 70: // IWEF
-		d.iwef(sev, data)
+		d.iwef(sev, data, stack)
 	default:
 		d.message(string(data))
 	}
 	d.closeHash()
 	// My Write always succeeds
-	return len(data), nil
+	return
 }
 
 // openEvent writes the "header" part of the JSON message.
@@ -94,15 +94,21 @@ func (d glogJSON) closeHash() {
 	io.WriteString(d.writer, "}\n")
 }
 
-// message add a JSON field with the JSON encoded message.
+// message adds a JSON field with the JSON encoded message.
 func (d glogJSON) message(msg string) {
 	io.WriteString(d.writer, `,"@message":`)
 	d.encoder.Encode(msg)
 }
 
+// stack adds a JSON field with the JSON encoded stack trace of all goroutines.
+func (d glogJSON) stacktrace(stacktrace []byte) {
+	io.WriteString(d.writer, `,"stack":`)
+	d.encoder.Encode(string(stacktrace))
+}
+
 // iwef decodes a glog data packet and write the JSON representation.
 // [IWEF]mmdd hh:mm:ss.uuuuuu threadid file:line] msg
-func (d glogJSON) iwef(sev byte, data []byte) {
+func (d glogJSON) iwef(sev byte, data []byte, trace []byte) {
 	io.WriteString(d.writer, `,"@fields":{"level":"`)
 	switch sev {
 	case 73:
@@ -127,6 +133,9 @@ func (d glogJSON) iwef(sev byte, data []byte) {
 	r.skip()
 	// space
 	r.skip()
+	if trace != nil && len(trace) > 0 {
+		d.stacktrace(trace)
+	}
 	// fields
 	d.closeHash()
 	d.message(r.stringUpToLineEnd())
@@ -143,23 +152,16 @@ func (i *iwefreader) skip() {
 	i.position++
 }
 
+// stringUpToLineEnd returns the string part from the data up to not-including the line end.
 func (i iwefreader) stringUpToLineEnd() string {
 	return string(i.data[i.position : len(i.data)-1]) // without the line delimiter
 }
 
+// stringUpTo returns the string part from the data up to not-including a delimiter.
 func (i *iwefreader) stringUpTo(delim byte) string {
 	start := i.position
 	for i.data[i.position] != delim {
 		i.position++
 	}
 	return string(i.data[start:i.position])
-}
-
-func (i *iwefreader) intUpTo(delim byte) int {
-	val := int(0)
-	for i.data[i.position] != delim {
-		val = (val * 10) + int(i.data[i.position]) - 48 // 0
-		i.position++
-	}
-	return val
 }
