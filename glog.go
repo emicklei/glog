@@ -654,9 +654,9 @@ func (l *loggingT) output(s severity, buf *buffer) {
 		}
 	}
 	data := buf.Bytes()
-	// if logstash is enabled and setup then write the data to it
-	if l.toLogstash && logstashAdapter != nil {
-		logstashAdapter.Write(data)
+	// if logstash is enabled and severity is not fatal then write the data to it
+	if l.toLogstash && logstashAdapter != nil && s != fatalLog {
+		logstashAdapter.WriteWithStack(data, nil) // without stack
 	}
 	if l.toStderr {
 		os.Stderr.Write(data)
@@ -691,6 +691,10 @@ func (l *loggingT) output(s severity, buf *buffer) {
 		}
 		// Write the stack trace for all goroutines to the files.
 		trace := stacks(true)
+		// if logstash is enabled and setup then write the data and stack to it
+		if l.toLogstash && logstashAdapter != nil {
+			logstashAdapter.WriteWithStack(data, trace)
+		}
 		logExitFunc = func(error) {} // If we get a write error, we'll still exit below.
 		for log := fatalLog; log >= infoLog; log-- {
 			if f := l.file[log]; f != nil { // Can be nil if -logtostderr is set.
