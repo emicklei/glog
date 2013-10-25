@@ -1,4 +1,4 @@
-// Go support for leveled logs, analogous to https://code.google.com/p/google-glog/
+// Go support for leveled logs, analogous to https://code.google.com/p/google-glog/ + logstash output
 //
 // Copyright 2013 Google Inc. All Rights Reserved.
 // Modifications are copyright 2013 Ernest Micklei. All Rights Reserved.
@@ -657,8 +657,8 @@ func (l *loggingT) output(s severity, buf *buffer) {
 	}
 	data := buf.Bytes()
 	// if logstash is enabled and severity is not fatal then write the data to it
-	if logstashAdapter.toLogstash && s != fatalLog {
-		logstashAdapter.WriteWithStack(data, nil) // without stack
+	if logstash.toLogstash && s != fatalLog {
+		logstash.WriteWithStack(data, nil) // without stack
 	}
 	if l.toStderr {
 		os.Stderr.Write(data)
@@ -694,8 +694,8 @@ func (l *loggingT) output(s severity, buf *buffer) {
 		// Write the stack trace for all goroutines to the files.
 		trace := stacks(true)
 		// if logstash is enabled and setup then write the data and stack to it
-		if logstashAdapter.toLogstash {
-			logstashAdapter.WriteWithStack(data, trace)
+		if logstash.toLogstash {
+			logstash.WriteWithStack(data, trace)
 		}
 		logExitFunc = func(error) {} // If we get a write error, we'll still exit below.
 		for log := fatalLog; log >= infoLog; log-- {
@@ -879,8 +879,8 @@ func (l *loggingT) flushAll() {
 		}
 	}
 	// flush pending logstash messages
-	if logstashAdapter.toLogstash {
-		logstashAdapter.flush()
+	if logstash.toLogstash {
+		logstash.flush()
 	}
 }
 
