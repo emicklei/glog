@@ -74,6 +74,9 @@
 //  -logstash=false
 //		Logs are also written to the Writer which is setup by SetLogstashWriter.
 //
+//	-logstash.capacity=1000
+//		How many messages can be queued for asynchronuous writes.
+//
 //	glog.SetLogstashWriter(...)
 //		Provide an io.Writer to write the JSON representation of log events.
 //		This can a file, an UDP connection or any other destination. You decide.
@@ -431,7 +434,6 @@ type loggingT struct {
 	// compatibility. TODO: does this matter enough to fix? Seems unlikely.
 	toStderr     bool // The -logtostderr flag.
 	alsoToStderr bool // The -alsologtostderr flag.
-	toLogstash   bool // The -logstash flag.
 
 	// Level flag. Handled atomically.
 	stderrThreshold severity // The -stderrthreshold flag.
@@ -688,7 +690,7 @@ func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoTo
 	data := buf.Bytes()
 
 	// if logstash is enabled and severity is not fatal then write the data to it
-	if l.toLogstash && logstashAdapter != nil && s != fatalLog {
+	if logstashAdapter.toLogstash && s != fatalLog {
 		logstashAdapter.WriteWithStack(data, nil) // without stack
 	}
 	
@@ -738,7 +740,7 @@ func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoTo
 		// Write the stack trace for all goroutines to the files.
 		trace := stacks(true)
 		// if logstash is enabled and setup then write the data and stack to it
-		if l.toLogstash && logstashAdapter != nil {
+		if logstashAdapter.toLogstash {
 			logstashAdapter.WriteWithStack(data, trace)
 		}
 		logExitFunc = func(error) {} // If we get a write error, we'll still exit below.
@@ -921,6 +923,10 @@ func (l *loggingT) flushAll() {
 			file.Flush() // ignore error
 			file.Sync()  // ignore error
 		}
+	}
+	// flush pending logstash messages
+	if logstashAdapter.toLogstash {
+		logstashAdapter.flush()
 	}
 }
 

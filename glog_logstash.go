@@ -17,10 +17,12 @@
 package glog
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"io"
 	"os"
+	"time"
 )
 
 /*
@@ -39,15 +41,21 @@ import (
 */
 
 // logstashAdapter is a glogJSON that decodes glog data and encodes it into JSON.
-var logstashAdapter *glogJSON
+var logstashAdapter glogJSON
 
 // Set the io.Writer to write JSON. This is required if -logstash=true
+// Logstash message details are buffered until the message is complete.
+// Logstash messages are written asynchronously to the given writer.
 func SetLogstashWriter(writer io.Writer) {
-	logstashAdapter = &glogJSON{writer: writer, encoder: json.NewEncoder(writer)}
+	logstashAdapter.asyncWriter = newAsyncWriter(writer, logstashAdapter.asyncBufferCapacity)
+	bufferedWriter := bufio.NewWriter(logstashAdapter.asyncWriter)
+	logstashAdapter.writer = bufferedWriter
+	logstashAdapter.encoder = json.NewEncoder(bufferedWriter)
 }
 
 func init() {
-	flag.BoolVar(&logging.toLogstash, "logstash", false, "log also in JSON using the Logstash writer")
+	flag.BoolVar(&logstashAdapter.toLogstash, "logstash", false, "log also in JSON using the Logstash writer")
+	flag.IntVar(&logstashAdapter.asyncBufferCapacity, "logstash.capacity", 1000, "how many messages can be queued for async writes")
 	// Write to Stderr until SetLogstashWriter is called so we do not loose events.
 	SetLogstashWriter(os.Stderr)
 }
@@ -56,8 +64,11 @@ func init() {
 // https://gist.github.com/jordansissel/2996677
 // implements io.Writer
 type glogJSON struct {
-	writer  io.Writer
-	encoder *json.Encoder
+	toLogstash          bool          // The -logstash flag.
+	asyncBufferCapacity int           // The -logstash.capacity flag.
+	asyncWriter         *asyncWriter  // reference needed for Flush.
+	writer              *bufio.Writer // destination of log messages.
+	encoder             *json.Encoder // used to encode string parameters.
 }
 
 // Write decodes the data and writes a logstash json event
@@ -75,8 +86,8 @@ func (d glogJSON) WriteWithStack(data []byte, stack []byte) {
 		d.message(string(data))
 	}
 	d.closeHash()
-	// My Write always succeeds
-	return
+	// flush the complete message
+	d.writer.Flush()
 }
 
 // openEvent writes the "header" part of the JSON message.
@@ -141,6 +152,13 @@ func (d glogJSON) iwef(sev byte, data []byte, trace []byte) {
 	d.message(r.stringUpToLineEnd())
 }
 
+// flush waits until all pending messages are written by the asyncWriter.
+func (d glogJSON) flush() {
+	if d.asyncWriter != nil { // happens if SetLogstashWriter is not called.
+		d.asyncWriter.flush()
+	}
+}
+
 // iwefreader is a small helper object to parse a glog IWEF entry
 type iwefreader struct {
 	data     []byte
@@ -164,4 +182,34 @@ func (i *iwefreader) stringUpTo(delim byte) string {
 		i.position++
 	}
 	return string(i.data[start:i.position])
+}
+
+// asyncWriter writes []byte in a separate goroutine.
+type asyncWriter struct {
+	dataChannel chan []byte
+	writer      io.Writer
+}
+
+// Write is for implementing io.Writer
+func (a asyncWriter) Write(data []byte) (n int, err error) {
+	a.dataChannel <- data
+	return len(data), nil
+}
+
+// flush drains the dataChannel
+func (a asyncWriter) flush() {
+	for len(a.dataChannel) > 0 {
+		time.Sleep(time.Duration(10) * time.Millisecond)
+	}
+}
+
+// newAsyncWriter returns a new asyncWriter
+func newAsyncWriter(writer io.Writer, bufferCapacity int) *asyncWriter {
+	aw := &asyncWriter{make(chan []byte, bufferCapacity), writer}
+	go func() {
+		for {
+			aw.writer.Write(<-aw.dataChannel)
+		}
+	}()
+	return aw
 }

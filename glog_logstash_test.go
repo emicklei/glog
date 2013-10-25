@@ -30,7 +30,7 @@ func TestInfoLogstash(t *testing.T) {
 	timeNow = func() time.Time {
 		return time.Date(2006, 1, 2, 15, 4, 5, .678901e9, time.Local)
 	}
-	logging.toLogstash = true // simulate -logstash=true
+	logstashAdapter.toLogstash = true // simulate -logstash=true
 	capture := new(bytes.Buffer)
 	SetLogstashWriter(capture)
 	Info("hello")
@@ -49,6 +49,13 @@ var jsonEnd = `"file":"glog_logstash_test.go","line":18}
 ,"@message":"hello"
 }
 `
+
+// go test -v -test.run TestEnabledLogstashNoWriter ...glog
+func TestEnabledLogstashNoWriter(t *testing.T) {
+	logstashAdapter.toLogstash = true
+	Info("hello")
+	Info("world")
+}
 
 func ExampleSetLogstashWriter() {
 	// TODO write the UDP example
