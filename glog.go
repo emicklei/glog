@@ -1,4 +1,4 @@
-// Go support for leveled logs, analogous to https://code.google.com/p/google-glog/ + logstash output
+// Go support for leveled logs, analogous to https://code.google.com/p/google-glog/
 //
 // Copyright 2013 Google Inc. All Rights Reserved.
 // Modifications are copyright 2013 Ernest Micklei. All Rights Reserved.
@@ -69,17 +69,7 @@
 //			-vmodule=gopher*=3
 //		sets the V level to 3 in all Go files whose names begin "gopher".
 //
-// Logstash support.
-//
-//  -logstash=false
-//		Logs are also written to the Writer which is setup by SetLogstashWriter.
-//
-//	-logstash.capacity=1000
-//		How many messages can be queued for asynchronuous writes.
-//
-//	glog.SetLogstashWriter(...)
-//		Provide an io.Writer to write the JSON representation of log events.
-//		This can a file, an UDP connection or any other destination. You decide.
+// See https://github.com/emicklei/glog/blob/master/FORK.md for information about the Logstash support.
 package glog
 
 import (

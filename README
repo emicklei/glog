@@ -3,6 +3,8 @@ glog
 
 Leveled execution logs for Go.
 
+See <https://github.com/emicklei/glog/blob/master/FORK.md> for information about the Logstash support.
+
 This is an efficient pure Go implementation of leveled logs in the
 manner of the open source C++ package
 	https://github.com/google/glog
