@@ -41,7 +41,7 @@ Examples
 
 - There is no Debugf, use glog.DebugEnabled() to wrap the Infof call to avoid computation of expensive arguments when severity level is lower than DEBUG.
 
-- There is no Tracef, use glog.TraceEnabled() to wrap the Infof call to avoid computation of expensive arguments when severity level is lower than DEBUG.
+- There is no Tracef, use glog.TraceEnabled() to wrap the Infof call to avoid computation of expensive arguments when severity level is lower than TRACE.
 
 * * *
 glog is copyright 2013 Google Inc. All Rights Reserved.
