@@ -31,6 +31,7 @@ func TestInfoLogstash(t *testing.T) {
 		return time.Date(2006, 1, 2, 15, 4, 5, .678901e9, time.Local)
 	}
 	logstash.toLogstash = true // simulate -logstash=true
+	host = "unknownhost"
 	capture := new(bytes.Buffer)
 	SetLogstashWriter(capture)
 	Info("hello")
@@ -41,7 +42,7 @@ func TestInfoLogstash(t *testing.T) {
 	}
 }
 
-var jsonBegin = `{"@source":"MacErnest"
+var jsonBegin = `{"@source":"unknownhost"
 ,"@type":"glog","@timestamp":"2006-01-02T15:04:05.678901+01:00"
 ,"@fields":{"level":"INFO","threadid":`
 
