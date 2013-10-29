@@ -44,9 +44,11 @@ func logit() {
 	Debug("this is debug level")
 	if DebugEnabled() {
 		Info("info is debug")
+		Debugf("formatted info is %s", "debug")
 	}
 	Trace("this is trace level")
 	if TraceEnabled() {
 		Info("info is trace")
+		Tracef("formatted info is %s", "trace")
 	}
 }
