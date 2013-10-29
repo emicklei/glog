@@ -36,7 +36,17 @@ func Debug(message string) {
 	V(DEBUG).Info(message)
 }
 
+// Debug prints the formatted message if the severity level is set to DEBUG or higher.
+func Debugf(format string, args ...interface{}) {
+	V(DEBUG).Infof(format, args...)
+}
+
 // Trace prints the message if the severity level is set to TRACE or higher.
 func Trace(message string) {
 	V(TRACE).Info(message)
+}
+
+// Tracef prints the formatted message if the severity level is set to TRACE or higher.
+func Tracef(format string, args ...interface{}) {
+	V(TRACE).Infof(format, args...)
 }

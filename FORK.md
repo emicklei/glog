@@ -23,25 +23,22 @@ Setup the logstash destination
 > This can a file, an UDP connection or any other implementation.
 
 
-Examples
+Examples of severity levels DEBUG(=10) and TRACE(=100)
 
 		glog.Info("Always printed")
+		glog.Infof("Printed on %v", time.Now())
+		
+		glog.Debug("Printed only if at least on DEBUG level")
 		
 		if glog.DebugEnabled() {
-			glog.Info("Printed only if at least on DEBUG level")
+			glog.Debugf("Printed only if at least on %s level", "DEBUG")
 		}
 
-		glog.Debug("Printed only if at least on DEBUG level")
-
-		if glog.TraceEnabled() {
-			glog.Info("Printed only if at least on TRACE level")
-		}
-		
 		glog.Trace("Printed only is at least on TRACE level")
-
-- There is no Debugf, use glog.DebugEnabled() to wrap the Infof call to avoid computation of expensive arguments when severity level is lower than DEBUG.
-
-- There is no Tracef, use glog.TraceEnabled() to wrap the Infof call to avoid computation of expensive arguments when severity level is lower than TRACE.
+		
+		if glog.TraceEnabled() {
+			glog.Tracef("Printed only if at least on %s level", "TRACE")
+		}		
 
 * * *
 glog is copyright 2013 Google Inc. All Rights Reserved.
