@@ -16,6 +16,8 @@
 
 package glog
 
+import "strconv"
+
 const (
 	DEBUG = 10 // severity levels
 	TRACE = 100
@@ -57,4 +59,9 @@ func Tracef(format string, args ...interface{}) {
 	if logging.verbosity >= TRACE {
 		logging.printf(infoLog, format, args...)
 	}
+}
+
+// SetVerbosity changes the current verbosity level to v.
+func SetVerbosity(v int) {
+	logging.verbosity.Set(strconv.Itoa(v))
 }
