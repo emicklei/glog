@@ -40,6 +40,10 @@ import (
 }
 */
 
+// ExtraFields contains a set of @fields elements that can be used by the application
+// to pass appliction and/or environment specific information.
+var ExtraFields = map[string]string{}
+
 // logstash is a logstashPublisher that decodes each glog data,
 // encodes it into JSON and writes it asynchronuously to an io.Writer.
 var logstash logstashPublisher
@@ -155,6 +159,13 @@ func (d glogJSON) iwef(sev byte, data []byte, trace []byte) {
 	r.skip()
 	if trace != nil && len(trace) > 0 {
 		d.stacktrace(trace)
+	}
+	// extras?
+	for k, v := range ExtraFields {
+		io.WriteString(d.writer, `,"`)
+		io.WriteString(d.writer, k)
+		io.WriteString(d.writer, `":`)
+		d.encoder.Encode(v)
 	}
 	// fields
 	d.closeHash()
