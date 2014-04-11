@@ -22,6 +22,20 @@ Setup the logstash destination
 > Provide an io.Writer to write the JSON representation of log events.
 > This can a file, an UDP connection or any other implementation.
 
+Passing extra fields to log messages (will be part of @fields)
+
+		ExtraFields["instance"] = "ps34"
+		ExtraFields["role"] = "webservice"
+		
+Sample
+
+		{"@source":"MacErnest"
+		,"@type":"glog","@timestamp":"2014-03-21T10:52:05.495118455+01:00"
+		,"@fields":{"level":"INFO","threadid":02628,"file":"glog_logstash_test.go","line":60,"instance":"ps34"
+		,"role":"webservice"
+		}
+		,"@message":"hello"
+		}				
 
 Examples of severity levels DEBUG(=10) and TRACE(=100)
 

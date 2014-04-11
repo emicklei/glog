@@ -54,8 +54,12 @@ var jsonEnd = `"file":"glog_logstash_test.go","line":18}
 // go test -v -test.run TestEnabledLogstashNoWriter ...glog
 func TestEnabledLogstashNoWriter(t *testing.T) {
 	logstash.toLogstash = true
+	SetLogstashWriter(os.Stdout)
+	ExtraFields["instance"] = "ps34"
+	ExtraFields["role"] = "webservice"
 	Info("hello")
 	Info("world")
+	logstash.toLogstash = false
 }
 
 func ExampleSetLogstashWriter() {
