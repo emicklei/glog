@@ -65,3 +65,8 @@ func Tracef(format string, args ...interface{}) {
 func SetVerbosity(v int) {
 	logging.verbosity.Set(strconv.Itoa(v))
 }
+
+// SetLogToStdErr enables write to stderr.
+func SetLoggingToStdErr() {
+	logging.toStderr = true
+}
