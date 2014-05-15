@@ -34,9 +34,9 @@ func TraceEnabled() bool {
 }
 
 // Debug prints the message if the severity level is set to DEBUG or higher.
-func Debug(message string) {
+func Debug(args ...interface{}) {
 	if logging.verbosity >= DEBUG {
-		logging.print(infoLog, message)
+		logging.print(infoLog, args)
 	}
 }
 
@@ -48,9 +48,9 @@ func Debugf(format string, args ...interface{}) {
 }
 
 // Trace prints the message if the severity level is set to TRACE or higher.
-func Trace(message string) {
+func Trace(args ...interface{}) {
 	if logging.verbosity >= TRACE {
-		logging.print(infoLog, message)
+		logging.print(infoLog, args)
 	}
 }
 
