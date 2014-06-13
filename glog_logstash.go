@@ -214,7 +214,6 @@ func (a asyncWriter) flush() {
 	for len(a.dataChannel) > 0 {
 		time.Sleep(time.Duration(10) * time.Millisecond)
 	}
-	close(a.dataChannel)
 }
 
 // newAsyncWriter returns a new asyncWriter
