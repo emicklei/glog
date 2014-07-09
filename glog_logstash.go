@@ -24,21 +24,6 @@ import (
 	"os"
 )
 
-/*
-{
-   "@source":"test.here.com",
-   "@type":"glog",
-   "@timestamp":"2013-10-24T09:30:46.947024155+02:00",
-   "@fields":{
-      "level":"INFO",
-      "threadid":400004,
-      "file":"file.go",
-      "line":10
-   },
-   "@message":"hello"
-}
-*/
-
 // ExtraFields contains a set of @fields elements that can be used by the application
 // to pass appliction and/or environment specific information.
 var ExtraFields = map[string]string{}
