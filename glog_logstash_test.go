@@ -18,6 +18,7 @@ package glog
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -40,6 +41,7 @@ func TestInfoLogstash(t *testing.T) {
 		println(actual)
 		t.Fatalf("mismatch in json")
 	}
+	Flush()
 }
 
 var jsonBegin = `{"@source":"unknownhost"
@@ -59,6 +61,25 @@ func TestEnabledLogstashNoWriter(t *testing.T) {
 	ExtraFields["role"] = "webservice"
 	Info("hello")
 	Info("world")
+	Flush()
+	logstash.toLogstash = false
+}
+
+type failingWriter struct{}
+
+func (f failingWriter) Write(p []byte) (n int, err error) {
+	return 0, errors.New("simulated fail")
+}
+
+// go test -v -test.run TestErrorWritingLogstashNoWriter ...glog
+func TestErrorWritingLogstashNoWriter(t *testing.T) {
+	logstash.toLogstash = true
+	SetLogstashWriter(failingWriter{})
+	ExtraFields["instance"] = "ps34"
+	ExtraFields["role"] = "webservice"
+	Info("hello")
+	Info("world")
+	Flush()
 	logstash.toLogstash = false
 }
 
