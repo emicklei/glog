@@ -29,8 +29,8 @@ Passing extra fields to log messages (will be part of @fields)
 		
 Sample
 
-		{"@source":"MacErnest"
-		,"@type":"glog","@timestamp":"2014-03-21T10:52:05.495118455+01:00"
+		{"@source_host":"MacErnest"
+		,"@timestamp":"2014-03-21T10:52:05.495118455+01:00"
 		,"@fields":{"level":"INFO","threadid":02628,"file":"glog_logstash_test.go","line":60,"instance":"ps34"
 		,"role":"webservice"
 		}

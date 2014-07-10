@@ -24,8 +24,7 @@ import (
 
 /*
 {
-   "@source":"test.here.com",
-   "@type":"glog",
+   "@source_host":"test.here.com",
    "@timestamp":"2013-10-24T09:30:46.947024155+02:00",
    "@fields":{
       "level":"INFO",
@@ -60,9 +59,8 @@ func (d glogJSON) WriteWithStack(data []byte, stack []byte) {
 
 // openEvent writes the "header" part of the JSON message.
 func (d glogJSON) openEvent() {
-	io.WriteString(d.writer, `{"@source":`)
+	io.WriteString(d.writer, `{"@source_host":`)
 	d.encoder.Encode(host) // uses glog package var
-	io.WriteString(d.writer, `,"@type":"glog"`)
 	io.WriteString(d.writer, `,"@timestamp":`)
 	// ignore time information given, take new snapshot
 	d.encoder.Encode(timeNow()) // use testable function stored in var

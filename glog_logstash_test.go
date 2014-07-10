@@ -44,8 +44,8 @@ func TestInfoLogstash(t *testing.T) {
 	Flush()
 }
 
-var jsonBegin = `{"@source":"unknownhost"
-,"@type":"glog","@timestamp":"2006-01-02T15:04:05.678901+01:00"
+var jsonBegin = `{"@source_host":"unknownhost"
+,"@timestamp":"2006-01-02T15:04:05.678901+01:00"
 ,"@fields":{"level":"INFO","threadid":`
 
 var jsonEnd = `"file":"glog_logstash_test.go","line":18}
