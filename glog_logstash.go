@@ -29,7 +29,7 @@ import (
 var ExtraFields = map[string]string{}
 
 // logstash is a logstashPublisher that decodes each glog data,
-// encodes it into JSON and writes it asynchronuously to an io.Writer.
+// encodes it into JSON and writes it to an io.Writer.
 var logstash logstashPublisher
 
 // Set the io.Writer to write JSON. This is required if -logstash=true
