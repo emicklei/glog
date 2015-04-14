@@ -59,8 +59,9 @@ func TestEnabledLogstashNoWriter(t *testing.T) {
 	SetLogstashWriter(os.Stdout)
 	ExtraFields["instance"] = "ps34"
 	ExtraFields["role"] = "webservice"
-	Info("hello")
-	Info("world")
+	Info("Info")
+	Warning("Warning")
+	Error("Error")
 	Flush()
 	logstash.toLogstash = false
 }
