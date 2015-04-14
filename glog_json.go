@@ -91,9 +91,9 @@ func (d glogJSON) iwef(sev byte, data []byte, trace []byte) {
 	case 73:
 		io.WriteString(d.writer, "INFO")
 	case 87:
-		io.WriteString(d.writer, "ERROR")
-	case 69:
 		io.WriteString(d.writer, "WARNING")
+	case 69:
+		io.WriteString(d.writer, "ERROR")
 	case 70:
 		io.WriteString(d.writer, "FATAL")
 	}
