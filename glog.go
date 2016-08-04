@@ -678,12 +678,11 @@ func (l *loggingT) output(s severity, buf *buffer, file string, line int, alsoTo
 		}
 	}
 	data := buf.Bytes()
-
 	// if logstash is enabled and severity is not fatal then write the data to it
 	if logstash.toLogstash && s != fatalLog {
 		logstash.WriteWithStack(data, nil) // without stack
 	}
-	
+
 	if !flag.Parsed() {
 		os.Stderr.Write([]byte("ERROR: logging before flag.Parse: "))
 		os.Stderr.Write(data)
